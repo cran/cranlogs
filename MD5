@@ -1,7 +1,9 @@
-061ce150e12ce6f3984afe6e3f917598 *DESCRIPTION
+4fdecfc98ca20f5a5b52ff60047c6e1b *DESCRIPTION
 dd9b9a646c92126c8c99c14a7a11753a *LICENSE
-0d1701924814176416ff646955132429 *NAMESPACE
-027c4f59bd2feb0cfb601bd699fddf5e *R/cranlogs.R
-d73e78707747794c212862e8df76102a *man/cran_downloads.Rd
-3d2a95bf773a083a7469dbe15ce536f6 *man/cran_top_downloads.Rd
-c6dc11ac661b3aaf08729d890dd230de *man/cranlogs.Rd
+150555d5d7aca2720d57128911a970fa *NAMESPACE
+d46c39fc2a4d1dda1a14059f3c921122 *R/cranlogs.R
+5d43ae845db955d66d61dd165c3986d5 *inst/NEWS.md
+394f6dfb65d96b78c0c13d8c676b35c9 *inst/README.md
+5cdb47d09d55f31bcecee88e41238c46 *man/cran_downloads.Rd
+466d041b6518fe73b858368a7223e2f9 *man/cran_top_downloads.Rd
+2c702d300d1b0ed8b79891bed625d992 *man/cranlogs.Rd
