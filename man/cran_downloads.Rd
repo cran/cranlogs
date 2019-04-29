@@ -13,8 +13,8 @@ or \code{NULL} for a sum of downloads for all packages.
 Alternatively, it can also be \code{"R"}, to query downloads
 of R itself. \code{"R"} cannot be mixed with packages.}
 
-\item{when}{\code{last_day}, \code{last_week} or \code{last_month}.
-If this is given, then \code{from} and \code{to} are ignored.}
+\item{when}{\code{last-day}, \code{last-week} or \code{last-month} (see 
+details). If this is given, then \code{from} and \code{to} are ignored.}
 
 \item{from}{Start date, in \code{yyyy-mm-dd} format, or
 \code{last-day}. It is ignored if \code{when} is given.}
@@ -35,15 +35,24 @@ For packages a data frame with columns:
 \description{
 Daily package downloads from the RStudio CRAN mirror
 }
+\details{
+\code{last-day} is the last day for which data is available,
+ \code{last-week} is from 6 days prior to that last day with data, 
+ \code{last-month} is from 29 days prior to that last day with data.
+ 
+ 0 counts can be due to the non-availability of data on the RStudio server 
+ for that day.
+}
 \examples{
 \dontrun{
-## All downloads yesterday
+## Default is last day for which data is available.
 cran_downloads()
 
-## All downloads for 'dplyr' yesterday
+## All downloads for 'dplyr' in the last day for which data is available.
 cran_downloads(packages = "dplyr")
 
 ## Daily downloads for 'igraph' last week
+## (6 days prior to the last day for which data is available)
 cran_downloads(packages = "igraph", when = "last-week")
 
 ## Downloads in the specified time interval
@@ -57,6 +66,6 @@ cran_downloads("R")
 }
 }
 \seealso{
-Other CRAN.downloads: \code{\link{cran_top_downloads}}
+Other CRAN downloads: \code{\link{cran_top_downloads}}
 }
-
+\concept{CRAN downloads}

@@ -1,11 +1,7 @@
 
-#' Download Logs from the RStudio CRAN Mirror
-#'
-#' @docType package
-#' @name cranlogs
 #' @importFrom httr GET content stop_for_status
 #' @importFrom jsonlite fromJSON
-NULL
+
 
 base_url  <- "http://cranlogs.r-pkg.org/"
 daily_url <- paste0(base_url, "downloads/daily/")
@@ -17,8 +13,8 @@ top_url   <- paste0(base_url, "top/")
 #'   or \code{NULL} for a sum of downloads for all packages.
 #'   Alternatively, it can also be \code{"R"}, to query downloads
 #'   of R itself. \code{"R"} cannot be mixed with packages.
-#' @param when \code{last_day}, \code{last_week} or \code{last_month}.
-#'   If this is given, then \code{from} and \code{to} are ignored.
+#' @param when \code{last-day}, \code{last-week} or \code{last-month} (see 
+#' details). If this is given, then \code{from} and \code{to} are ignored.
 #' @param from Start date, in \code{yyyy-mm-dd} format, or
 #'   \code{last-day}. It is ignored if \code{when} is given.
 #' @param to End date, in \code{yyyy-mm-dd} format, or
@@ -32,17 +28,24 @@ top_url   <- paste0(base_url, "top/")
 #'   For downloads of R, there are also columns for the operating
 #'   system (\code{os}) and the R version (\code{version}).
 #'
+#' @details \code{last-day} is the last day for which data is available,
+#'  \code{last-week} is from 6 days prior to that last day with data, 
+#'  \code{last-month} is from 29 days prior to that last day with data.
+#'  
+#'  0 counts can be due to the non-availability of data on the RStudio server 
+#'  for that day.
 #' @family CRAN downloads
 #' @export
 #' @examples
 #' \dontrun{
-#' ## All downloads yesterday
+#' ## Default is last day for which data is available.
 #' cran_downloads()
 #'
-#' ## All downloads for 'dplyr' yesterday
+#' ## All downloads for 'dplyr' in the last day for which data is available.
 #' cran_downloads(packages = "dplyr")
 #'
 #' ## Daily downloads for 'igraph' last week
+#' ## (6 days prior to the last day for which data is available)
 #' cran_downloads(packages = "igraph", when = "last-week")
 #'
 #' ## Downloads in the specified time interval
@@ -62,6 +65,14 @@ cran_downloads <- function(packages = NULL,
   if (!missing(when)) {
     interval <- match.arg(when)
   } else {
+    if (as.character(from) != "last-day") {
+      check_date(from)
+    }
+    
+    if (as.character(to) != "last-day") {
+      check_date(to)
+    }
+    
     if (from == to) {
       interval <- from
     } else {
@@ -86,7 +97,6 @@ cran_downloads <- function(packages = NULL,
   if ("error" %in% names(r) && r$error == "Invalid query") {
     stop("Invalid query, probably invalid dates")
   }
-
   to_df(r, packages)
 
 }
@@ -120,7 +130,7 @@ to_df_r <- function(res1) {
     os = vapply(res1$downloads, "[[", "", "os"),
     count = vapply(res1$downloads, "[[", 1, "downloads")
   )
-  fill_in_dates(df, as.Date(res1$start), as.Date(res1$end))
+  df
 }
 
 fill_in_dates <- function(df, start, end) {
@@ -136,13 +146,15 @@ fill_in_dates <- function(df, start, end) {
     )
     df <- rbind(df, df2)
     df <- df[order(df$date),]
+    rownames(df) <- NULL
   }
   df
 }
 
 #' Top downloaded packages from the RStudio CRAN mirror
 #'
-#' @param when \code{last_day}, \code{last_week} or \code{last_month}.
+#' @param when \code{last-day}, \code{last-week} or \code{last-month} (see 
+#' details).
 #' @param count Number of packages to list. Note that the DB server
 #'   lists only at most 100 packages. This number might change in the
 #'   future.
@@ -153,12 +165,20 @@ fill_in_dates <- function(df, start, end) {
 #' @export
 #' @examples
 #' \dontrun{
-#' ## Default is last day
+#' ## Default is last day for which data is available.
 #' cran_top_downloads()
 #'
-#' ## Last week instead
+#' ## Last week (6 days prior to the last day for which data is available) 
+#' ## instead
 #' cran_top_downloads(when = "last-week")
 #' }
+#' 
+#' @details \code{last-day} is the last day for which data is available,
+#'  \code{last-week} is from 6 days prior to that last day with data, 
+#'  \code{last-month} is from 29 days prior to that last day with data.
+#'  
+#'  0 counts can be due to the non-availability of data on the RStudio server 
+#'  for that day.
 
 cran_top_downloads <- function(when = c("last-day", "last-week",
                                  "last-month"), count = 10) {
@@ -166,8 +186,9 @@ cran_top_downloads <- function(when = c("last-day", "last-week",
   when <- match.arg(when)
   req <- GET(paste0(top_url, when, '/', count))
   stop_for_status(req)
-  r <- fromJSON(content(req, as = "text"), simplifyVector = FALSE)
-
+  r <- fromJSON(content(req, as = "text", encoding = "UTF-8"), 
+    simplifyVector = FALSE)
+  
   df <- data.frame(
     stringsAsFactors = FALSE,
     rank = seq_along(r$downloads),
